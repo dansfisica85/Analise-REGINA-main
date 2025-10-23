@@ -1,0 +1,2 @@
+# Pasta de assets para páginas legadas
+# Copie aqui seus arquivos HTML e recursos estáticos (js, css, json)

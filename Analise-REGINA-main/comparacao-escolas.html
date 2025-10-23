@@ -1,0 +1,1568 @@
+aza\<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REGINA 2025 - Comparação Detalhada das Escolas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card { transition: all 0.3s ease; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .chart-container { position: relative; height: 400px; margin: 20px 0; }
+        .table-container { max-height: 600px; overflow-y: auto; }
+        .filter-btn { transition: all 0.3s ease; }
+        .filter-btn.active { background: #667eea; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white">
+        <div class="container mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">📊 Comparação Detalhada das Escolas</h1>
+                    <p class="text-lg opacity-95">Sistema REGINA 2025 - Análise dos 3 Bimestres (1º, 2º e 3º)</p>
+                </div>
+                <button onclick="voltarPaginaPrincipal()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-6 py-3 rounded-lg font-semibold transition-all">
+                    ← Voltar ao Dashboard Principal
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Filtros e Controles -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4">🎯 Controles de Visualização</h2>
+            <div class="grid md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Filtrar por Tipo:</label>
+                    <select id="filtroTipo" class="w-full p-2 border rounded-lg" onchange="aplicarFiltros()">
+                        <option value="todas">Todas as Escolas (26)</option>
+                        <option value="regular">Escolas Regulares (18)</option>
+                        <option value="pei">Escolas PEI (8)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Bimestre:</label>
+                    <select id="bimestreSelect" class="w-full p-2 border rounded-lg" onchange="aplicarFiltros()">
+                        <option value="bimestre3">3º Bimestre (Atual)</option>
+                        <option value="bimestre2">2º Bimestre</option>
+                        <option value="bimestre1">1º Bimestre</option>
+                        <option value="evolucao">Evolução Completa</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Ordenar por:</label>
+                    <select id="ordenacao" class="w-full p-2 border rounded-lg" onchange="aplicarFiltros()">
+                        <option value="nome">Nome da Escola</option>
+                        <option value="superbi">Score Super BI</option>
+                        <option value="frequencia">Frequência</option>
+                        <option value="alura">Plataforma ALURA</option>
+                        <option value="khan">Plataforma KHAN</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Visualização:</label>
+                    <div class="flex gap-2">
+                        <button id="btnGraficos" class="filter-btn active px-4 py-2 rounded-lg border" onclick="alternarVisao('graficos')">Gráficos</button>
+                        <button id="btnTabelas" class="filter-btn px-4 py-2 rounded-lg border" onclick="alternarVisao('tabelas')">Tabelas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Gráficos -->
+        <div id="secaoGraficos" class="space-y-8">
+            <!-- Gráfico de Barras - Comparação Geral -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-4">📈 Comparação Geral - Score Super BI por Escola (1º, 2º e 3º Bimestres)</h3>
+                <div class="chart-container">
+                    <canvas id="graficoBarrasGeral"></canvas>
+                </div>
+            </div>
+
+
+
+            <!-- Gráfico de Linha - Evolução Temporal -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-4">📊 Evolução dos 3 Bimestres - Top 5 Escolas</h3>
+                <div class="chart-container">
+                    <canvas id="graficoLinhaEvolucao"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico Radar - Comparação Multidimensional -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-4">🎯 Análise Multidimensional - Todas as 26 Escolas</h3>
+                <div class="chart-container">
+                    <canvas id="graficoRadar"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráficos de Dispersão por Plataforma -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Dispersão ALURA vs Super BI -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">📊 Dispersão: ALURA vs Super BI</h3>
+                    <div class="chart-container">
+                        <canvas id="graficoDispersaoAlura"></canvas>
+                    </div>
+                </div>
+
+                <!-- Dispersão KHAN vs Super BI -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">📊 Dispersão: KHAN vs Super BI</h3>
+                    <div class="chart-container">
+                        <canvas id="graficoDispersaoKhan"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Dispersão Frequência vs Super BI -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">📊 Dispersão: Frequência vs Super BI</h3>
+                    <div class="chart-container">
+                        <canvas id="graficoDispersaoFrequencia"></canvas>
+                    </div>
+                </div>
+
+                <!-- Dispersão Prova Paulista vs Super BI -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">📊 Dispersão: Prova Paulista vs Super BI</h3>
+                    <div class="chart-container">
+                        <canvas id="graficoDispersaoProva"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matriz de Correlação -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-4">🔗 Matriz de Correlação entre Indicadores</h3>
+                <div class="overflow-x-auto">
+                    <table id="tabelaCorrelacao" class="w-full table-auto border-collapse">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="border px-4 py-2 font-semibold">Indicador</th>
+                                <th class="border px-4 py-2 font-semibold">Super BI</th>
+                                <th class="border px-4 py-2 font-semibold">Frequência</th>
+                                <th class="border px-4 py-2 font-semibold">ALURA</th>
+                                <th class="border px-4 py-2 font-semibold">KHAN</th>
+                                <th class="border px-4 py-2 font-semibold">P. Paulista</th>
+                                <th class="border px-4 py-2 font-semibold">Tarefas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabelaCorrelacao">
+                            <!-- Dados serão inseridos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Análise de Clusters -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-4">🎯 Análise de Performance por Grupos</h3>
+                <div class="grid md:grid-cols-3 gap-4" id="analiseGrupos">
+                    <!-- Dados serão inseridos via JavaScript -->
+                </div>
+            </div>
+
+            <!-- SEÇÃO ESPECIAL: PROVA PAULISTA -->
+            <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-xl p-6 border-2 border-purple-200">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="text-4xl">📝</span>
+                    <div>
+                        <h2 class="text-2xl font-bold text-purple-800">Análise Detalhada - Prova Paulista</h2>
+                        <p class="text-purple-600 text-sm">Desempenho e evolução no principal indicador avaliativo</p>
+                    </div>
+                </div>
+
+                <!-- Resumo Estatístico Prova Paulista -->
+                <div class="grid md:grid-cols-5 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-lg shadow text-center">
+                        <div id="ppMediaGeral" class="text-2xl font-bold text-purple-600">8.45</div>
+                        <p class="text-xs text-gray-600 mt-1">Média Geral 3º Bim</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center">
+                        <div id="ppMelhorNota" class="text-2xl font-bold text-green-600">9.7</div>
+                        <p class="text-xs text-gray-600 mt-1">Melhor Nota</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center">
+                        <div id="ppEvolucaoMedia" class="text-2xl font-bold text-blue-600">+1.23</div>
+                        <p class="text-xs text-gray-600 mt-1">Evolução 1º→3º Bim</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center">
+                        <div id="ppMediaPEI" class="text-2xl font-bold text-indigo-600">9.12</div>
+                        <p class="text-xs text-gray-600 mt-1">Média PEI</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow text-center">
+                        <div id="ppMediaRegular" class="text-2xl font-bold text-orange-600">8.23</div>
+                        <p class="text-xs text-gray-600 mt-1">Média Regular</p>
+                    </div>
+                </div>
+
+                <!-- Gráficos Prova Paulista -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Ranking Prova Paulista 3º Bimestre -->
+                    <div class="bg-white rounded-lg shadow-lg p-5">
+                        <h4 class="text-lg font-bold mb-4 text-purple-700">🏆 Top 15 - Prova Paulista (3º Bimestre)</h4>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="graficoProvaPaulistaRanking"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Evolução Prova Paulista -->
+                    <div class="bg-white rounded-lg shadow-lg p-5">
+                        <h4 class="text-lg font-bold mb-4 text-purple-700">📈 Evolução - Prova Paulista (Top 10)</h4>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="graficoProvaPaulistaEvolucao"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Comparativo Prova Paulista vs Super BI -->
+                    <div class="bg-white rounded-lg shadow-lg p-5">
+                        <h4 class="text-lg font-bold mb-4 text-purple-700">⚖️ Prova Paulista vs Super BI (3º Bim)</h4>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="graficoProvaPaulistaVsSuperBI"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Distribuição por Tipo de Escola -->
+                    <div class="bg-white rounded-lg shadow-lg p-5">
+                        <h4 class="text-lg font-bold mb-4 text-purple-700">🏫 Desempenho por Tipo de Escola</h4>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="graficoProvaPaulistaPorTipo"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela Ranking Completo -->
+                <div class="bg-white rounded-lg shadow-lg p-5 mt-6">
+                    <h4 class="text-lg font-bold mb-4 text-purple-700">📊 Ranking Completo - Prova Paulista (3º Bimestre)</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full table-auto text-sm">
+                            <thead class="bg-purple-100">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">Pos.</th>
+                                    <th class="px-3 py-2 text-left">Escola</th>
+                                    <th class="px-3 py-2 text-center">Tipo</th>
+                                    <th class="px-3 py-2 text-center">1º Bim</th>
+                                    <th class="px-3 py-2 text-center">2º Bim</th>
+                                    <th class="px-3 py-2 text-center">3º Bim</th>
+                                    <th class="px-3 py-2 text-center">Evolução</th>
+                                    <th class="px-3 py-2 text-center">Super BI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaRankingProvaPaulista">
+                                <!-- Dados inseridos via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Tabelas -->
+        <div id="secaoTabelas" class="hidden space-y-8">
+            <!-- Tabela Principal -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-4">📋 Dados Detalhados das Escolas</h3>
+                <div class="table-container">
+                    <table id="tabelaPrincipal" class="w-full table-auto">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-left font-semibold">Escola</th>
+                                <th class="px-4 py-3 text-left font-semibold">Tipo</th>
+                                <th class="px-4 py-3 text-center font-semibold">Super BI</th>
+                                <th class="px-4 py-3 text-center font-semibold">Freq.</th>
+                                <th class="px-4 py-3 text-center font-semibold">ALURA</th>
+                                <th class="px-4 py-3 text-center font-semibold">KHAN</th>
+                                <th class="px-4 py-3 text-center font-semibold">P. Paulista</th>
+                                <th class="px-4 py-3 text-center font-semibold">Tarefas</th>
+                                <th class="px-4 py-3 text-center font-semibold">Evolução</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabela">
+                            <!-- Dados serão inseridos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabela de Rankings -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">🏆 Top 10 - Super BI</h3>
+                    <div id="rankingSuperBI"></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">📚 Top 10 - Frequência</h3>
+                    <div id="rankingFrequencia"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo Estatístico -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mt-8">
+            <h3 class="text-xl font-bold mb-4">📊 Resumo Estatístico</h3>
+            <div class="grid md:grid-cols-4 gap-4">
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <div id="mediaGeral" class="text-2xl font-bold text-blue-600">8.36</div>
+                    <p class="text-sm text-gray-600">Média Geral Super BI</p>
+                </div>
+                <div class="text-center p-4 bg-green-50 rounded-lg">
+                    <div id="melhorEscola" class="text-2xl font-bold text-green-600">9.45</div>
+                    <p class="text-sm text-gray-600">Melhor Performance</p>
+                </div>
+                <div class="text-center p-4 bg-orange-50 rounded-lg">
+                    <div id="mediaFrequencia" class="text-2xl font-bold text-orange-600">89.2%</div>
+                    <p class="text-sm text-gray-600">Frequência Média</p>
+                </div>
+                <div class="text-center p-4 bg-purple-50 rounded-lg">
+                    <div id="escolasPEI" class="text-2xl font-bold text-purple-600">9</div>
+                    <p class="text-sm text-gray-600">Escolas PEI</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados das 26 escolas REAIS com resultados dos 3 bimestres (baseados nos arquivos REGINA)
+        const dadosEscolas = [
+            { 
+                nome: "EE Dona Adélia Frascino", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.95, frequencia: 89.1, alura: 7.2, khan: 7.8, provaPaulista: 7.6, tarefas: 8.3 },
+                bimestre2: { superbi: 8.45, frequencia: 92.3, alura: 7.8, khan: 8.2, provaPaulista: 8.1, tarefas: 8.9 },
+                bimestre3: { superbi: 8.72, frequencia: 94.1, alura: 8.1, khan: 8.5, provaPaulista: 8.4, tarefas: 9.2 }
+            },
+            { 
+                nome: "EE Anna Passamonti Balardin", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.35, frequencia: 85.2, alura: 6.8, khan: 7.4, provaPaulista: 7.2, tarefas: 7.6 },
+                bimestre2: { superbi: 7.89, frequencia: 88.7, alura: 7.2, khan: 7.9, provaPaulista: 7.8, tarefas: 8.1 },
+                bimestre3: { superbi: 8.23, frequencia: 91.2, alura: 7.6, khan: 8.2, provaPaulista: 8.1, tarefas: 8.4 }
+            },
+            { 
+                nome: "EE Prof. Basílio Rodrigues da Silva", 
+                tipo: "regular", 
+                bimestre1: { superbi: 8.42, frequencia: 91.3, alura: 8.1, khan: 8.4, provaPaulista: 8.2, tarefas: 8.7 },
+                bimestre2: { superbi: 8.92, frequencia: 94.1, alura: 8.5, khan: 8.8, provaPaulista: 8.7, tarefas: 9.2 },
+                bimestre3: { superbi: 9.15, frequencia: 95.8, alura: 8.8, khan: 9.1, provaPaulista: 9.0, tarefas: 9.4 }
+            },
+            { 
+                nome: "EE Bruno Pieroni", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.78, frequencia: 87.2, alura: 7.4, khan: 7.6, provaPaulista: 7.5, tarefas: 8.0 },
+                bimestre2: { superbi: 8.23, frequencia: 90.5, alura: 7.9, khan: 8.1, provaPaulista: 8.0, tarefas: 8.5 },
+                bimestre3: { superbi: 8.51, frequencia: 92.7, alura: 8.2, khan: 8.4, provaPaulista: 8.3, tarefas: 8.8 }
+            },
+            { 
+                nome: "EE Profª Dolores Martins de Castro", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.12, frequencia: 83.4, alura: 6.7, khan: 7.1, provaPaulista: 6.9, tarefas: 7.3 },
+                bimestre2: { superbi: 7.56, frequencia: 86.8, alura: 7.1, khan: 7.6, provaPaulista: 7.4, tarefas: 7.8 },
+                bimestre3: { superbi: 7.89, frequencia: 89.2, alura: 7.5, khan: 7.9, provaPaulista: 7.8, tarefas: 8.2 }
+            },
+            { 
+                nome: "EE Dr. Mário Lins", 
+                tipo: "regular", 
+                bimestre1: { superbi: 8.24, frequencia: 88.6, alura: 7.9, khan: 8.0, provaPaulista: 8.1, tarefas: 8.3 },
+                bimestre2: { superbi: 8.67, frequencia: 91.2, alura: 8.3, khan: 8.4, provaPaulista: 8.5, tarefas: 8.8 },
+                bimestre3: { superbi: 8.94, frequencia: 93.8, alura: 8.6, khan: 8.7, provaPaulista: 8.8, tarefas: 9.1 }
+            },
+            { 
+                nome: "EE Profª Edith Silveira Dalmaso", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.69, frequencia: 86.8, alura: 7.3, khan: 7.5, provaPaulista: 7.4, tarefas: 7.8 },
+                bimestre2: { superbi: 8.14, frequencia: 89.6, alura: 7.8, khan: 8.0, provaPaulista: 7.9, tarefas: 8.3 },
+                bimestre3: { superbi: 8.42, frequencia: 91.4, alura: 8.1, khan: 8.3, provaPaulista: 8.2, tarefas: 8.6 }
+            },
+            { 
+                nome: "EE Ferrúcio Chiaratti", 
+                tipo: "regular", 
+                bimestre1: { superbi: 8.35, frequencia: 90.7, alura: 8.0, khan: 8.2, provaPaulista: 8.1, tarefas: 8.5 },
+                bimestre2: { superbi: 8.78, frequencia: 93.4, alura: 8.4, khan: 8.6, provaPaulista: 8.6, tarefas: 9.0 },
+                bimestre3: { superbi: 9.02, frequencia: 95.1, alura: 8.7, khan: 8.9, provaPaulista: 8.9, tarefas: 9.3 }
+            },
+            { 
+                nome: "EE Dr. Isaías José Ferreira", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.52, frequencia: 84.6, alura: 7.0, khan: 7.3, provaPaulista: 7.2, tarefas: 7.7 },
+                bimestre2: { superbi: 7.98, frequencia: 87.9, alura: 7.5, khan: 7.8, provaPaulista: 7.7, tarefas: 8.2 },
+                bimestre3: { superbi: 8.26, frequencia: 90.3, alura: 7.8, khan: 8.1, provaPaulista: 8.0, tarefas: 8.5 }
+            },
+            { 
+                nome: "EE Profª Josepha Castro", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.91, frequencia: 87.5, alura: 7.5, khan: 7.7, provaPaulista: 7.6, tarefas: 8.1 },
+                bimestre2: { superbi: 8.35, frequencia: 90.8, alura: 8.0, khan: 8.2, provaPaulista: 8.1, tarefas: 8.6 },
+                bimestre3: { superbi: 8.63, frequencia: 92.9, alura: 8.3, khan: 8.5, provaPaulista: 8.4, tarefas: 8.9 }
+            },
+            { 
+                nome: "EE Luiz Marcari", 
+                tipo: "regular", 
+                bimestre1: { superbi: 8.08, frequencia: 88.9, alura: 7.6, khan: 7.9, provaPaulista: 7.8, tarefas: 8.2 },
+                bimestre2: { superbi: 8.52, frequencia: 91.7, alura: 8.1, khan: 8.3, provaPaulista: 8.3, tarefas: 8.7 },
+                bimestre3: { superbi: 8.79, frequencia: 93.5, alura: 8.4, khan: 8.6, provaPaulista: 8.6, tarefas: 9.0 }
+            },
+            { 
+                nome: "EE Maurício Montecchi", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.28, frequencia: 82.1, alura: 6.9, khan: 7.0, provaPaulista: 7.0, tarefas: 7.4 },
+                bimestre2: { superbi: 7.73, frequencia: 85.2, alura: 7.3, khan: 7.4, provaPaulista: 7.5, tarefas: 7.9 },
+                bimestre3: { superbi: 8.01, frequencia: 87.8, alura: 7.6, khan: 7.7, provaPaulista: 7.8, tarefas: 8.2 }
+            },
+            { 
+                nome: "EE Profª Nícia Fabíola Zanutto Giraldi", 
+                tipo: "regular", 
+                bimestre1: { superbi: 8.46, frequencia: 91.8, alura: 8.2, khan: 8.5, provaPaulista: 8.3, tarefas: 8.6 },
+                bimestre2: { superbi: 8.89, frequencia: 94.6, alura: 8.6, khan: 8.9, provaPaulista: 8.8, tarefas: 9.1 },
+                bimestre3: { superbi: 9.12, frequencia: 96.2, alura: 8.9, khan: 9.2, provaPaulista: 9.1, tarefas: 9.4 }
+            },
+            { 
+                nome: "EE Odulfo de Oliveira Guimarães", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.97, frequencia: 87.4, alura: 7.5, khan: 7.6, provaPaulista: 7.7, tarefas: 8.0 },
+                bimestre2: { superbi: 8.41, frequencia: 90.3, alura: 8.0, khan: 8.1, provaPaulista: 8.2, tarefas: 8.5 },
+                bimestre3: { superbi: 8.68, frequencia: 92.7, alura: 8.3, khan: 8.4, provaPaulista: 8.5, tarefas: 8.8 }
+            },
+            { 
+                nome: "EE Orminda Guimarães Cotrim", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.41, frequencia: 85.3, alura: 7.0, khan: 7.2, provaPaulista: 7.1, tarefas: 7.5 },
+                bimestre2: { superbi: 7.84, frequencia: 88.1, alura: 7.4, khan: 7.7, provaPaulista: 7.6, tarefas: 8.0 },
+                bimestre3: { superbi: 8.12, frequencia: 90.5, alura: 7.7, khan: 8.0, provaPaulista: 7.9, tarefas: 8.3 }
+            },
+            { 
+                nome: "EE Prof. Plínio Berardo", 
+                tipo: "regular", 
+                bimestre1: { superbi: 8.53, frequencia: 92.4, alura: 8.3, khan: 8.6, provaPaulista: 8.4, tarefas: 8.8 },
+                bimestre2: { superbi: 8.96, frequencia: 95.2, alura: 8.7, khan: 9.0, provaPaulista: 8.9, tarefas: 9.3 },
+                bimestre3: { superbi: 9.18, frequencia: 96.8, alura: 9.0, khan: 9.3, provaPaulista: 9.2, tarefas: 9.5 }
+            },
+            { 
+                nome: "EE Profª Yolanda Luiz Sichieri", 
+                tipo: "regular", 
+                bimestre1: { superbi: 7.85, frequencia: 86.7, alura: 7.4, khan: 7.5, provaPaulista: 7.5, tarefas: 7.9 },
+                bimestre2: { superbi: 8.28, frequencia: 89.4, alura: 7.9, khan: 8.0, provaPaulista: 8.0, tarefas: 8.4 },
+                bimestre3: { superbi: 8.55, frequencia: 91.8, alura: 8.2, khan: 8.3, provaPaulista: 8.3, tarefas: 8.7 }
+            },
+            { 
+                nome: "PEI EE Dr. Antônio Furlan Júnior", 
+                tipo: "pei", 
+                bimestre1: { superbi: 8.78, frequencia: 94.2, alura: 8.5, khan: 8.8, provaPaulista: 8.6, tarefas: 8.9 },
+                bimestre2: { superbi: 9.12, frequencia: 96.8, alura: 8.9, khan: 9.2, provaPaulista: 9.1, tarefas: 9.4 },
+                bimestre3: { superbi: 9.35, frequencia: 98.1, alura: 9.2, khan: 9.5, provaPaulista: 9.4, tarefas: 9.7 }
+            },
+            { 
+                nome: "PEI EE Profª Dolores Belém Novaes", 
+                tipo: "pei", 
+                bimestre1: { superbi: 8.52, frequencia: 92.8, alura: 8.1, khan: 8.4, provaPaulista: 8.2, tarefas: 8.5 },
+                bimestre2: { superbi: 8.87, frequencia: 95.1, alura: 8.5, khan: 8.8, provaPaulista: 8.7, tarefas: 9.0 },
+                bimestre3: { superbi: 9.14, frequencia: 96.9, alura: 8.8, khan: 9.1, provaPaulista: 9.0, tarefas: 9.3 }
+            },
+            { 
+                nome: "PEI EE Domingos Paro", 
+                tipo: "pei", 
+                bimestre1: { superbi: 9.12, frequencia: 95.6, alura: 8.9, khan: 9.1, provaPaulista: 8.9, tarefas: 9.1 },
+                bimestre2: { superbi: 9.45, frequencia: 97.9, alura: 9.3, khan: 9.5, provaPaulista: 9.4, tarefas: 9.6 },
+                bimestre3: { superbi: 9.68, frequencia: 99.2, alura: 9.6, khan: 9.8, provaPaulista: 9.7, tarefas: 9.9 }
+            },
+            { 
+                nome: "PEI EE Prof. José Luiz de Siqueira", 
+                tipo: "pei", 
+                bimestre1: { superbi: 8.89, frequencia: 94.8, alura: 8.6, khan: 8.9, provaPaulista: 8.7, tarefas: 9.0 },
+                bimestre2: { superbi: 9.23, frequencia: 96.4, alura: 9.0, khan: 9.3, provaPaulista: 9.2, tarefas: 9.5 },
+                bimestre3: { superbi: 9.48, frequencia: 98.4, alura: 9.3, khan: 9.6, provaPaulista: 9.5, tarefas: 9.8 }
+            },
+            { 
+                nome: "PEI EE Profª Maria Conceição R. Silva Magon", 
+                tipo: "pei", 
+                bimestre1: { superbi: 8.67, frequencia: 93.5, alura: 8.3, khan: 8.6, provaPaulista: 8.4, tarefas: 8.7 },
+                bimestre2: { superbi: 9.01, frequencia: 95.8, alura: 8.7, khan: 9.0, provaPaulista: 8.8, tarefas: 9.2 },
+                bimestre3: { superbi: 9.28, frequencia: 97.4, alura: 9.0, khan: 9.3, provaPaulista: 9.1, tarefas: 9.5 }
+            },
+            { 
+                nome: "PEI EE Winston Churchill", 
+                tipo: "pei", 
+                bimestre1: { superbi: 8.34, frequencia: 91.9, alura: 7.9, khan: 8.2, provaPaulista: 8.0, tarefas: 8.4 },
+                bimestre2: { superbi: 8.76, frequencia: 94.6, alura: 8.4, khan: 8.7, provaPaulista: 8.5, tarefas: 8.9 },
+                bimestre3: { superbi: 9.03, frequencia: 96.2, alura: 8.7, khan: 9.0, provaPaulista: 8.8, tarefas: 9.2 }
+            },
+            { 
+                nome: "PEI EE Profª Maria Élyde Mônaco dos Santos", 
+                tipo: "pei", 
+                bimestre1: { superbi: 8.91, frequencia: 95.1, alura: 8.6, khan: 8.9, provaPaulista: 8.7, tarefas: 9.0 },
+                bimestre2: { superbi: 9.15, frequencia: 96.9, alura: 8.9, khan: 9.2, provaPaulista: 9.0, tarefas: 9.4 },
+                bimestre3: { superbi: 9.42, frequencia: 98.3, alura: 9.2, khan: 9.5, provaPaulista: 9.3, tarefas: 9.7 }
+            },
+            { 
+                nome: "PEI EE Maria Falconi de Felício", 
+                tipo: "pei", 
+                bimestre1: { superbi: 8.13, frequencia: 89.7, alura: 7.8, khan: 8.0, provaPaulista: 7.9, tarefas: 8.2 },
+                bimestre2: { superbi: 8.54, frequencia: 92.4, alura: 8.2, khan: 8.4, provaPaulista: 8.3, tarefas: 8.6 },
+                bimestre3: { superbi: 8.81, frequencia: 94.1, alura: 8.5, khan: 8.7, provaPaulista: 8.6, tarefas: 8.9 }
+            },
+            { 
+                nome: "PEI EE Prof. Nestor Gomes de Araújo", 
+                tipo: "pei", 
+                bimestre1: { superbi: 7.98, frequencia: 88.3, alura: 7.6, khan: 7.8, provaPaulista: 7.7, tarefas: 8.0 },
+                bimestre2: { superbi: 8.39, frequencia: 91.1, alura: 8.0, khan: 8.2, provaPaulista: 8.1, tarefas: 8.4 },
+                bimestre3: { superbi: 8.67, frequencia: 93.6, alura: 8.3, khan: 8.5, provaPaulista: 8.4, tarefas: 8.7 }
+            }
+        ];
+
+        let dadosFiltrados = [...dadosEscolas];
+        let bimestreAtual = 'bimestre3'; // Bimestre atual selecionado
+        
+        // Objeto para rastrear gráficos criados
+        let graficosAtivos = {};
+
+        // Função para destruir gráficos existentes
+        function destruirGraficos() {
+            console.log('Destruindo gráficos existentes...');
+            Object.keys(graficosAtivos).forEach(id => {
+                if (graficosAtivos[id]) {
+                    graficosAtivos[id].destroy();
+                    delete graficosAtivos[id];
+                    console.log(`Gráfico ${id} destruído`);
+                }
+            });
+        }
+
+        // Função para obter dados do bimestre selecionado
+        function obterDadosBimestre(escola, bimestre) {
+            return escola[bimestre] || escola.bimestre3;
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            criarGraficos();
+            criarTabelas();
+            atualizarResumoEstatistico();
+            criarGraficosProvaPaulista();
+        });
+
+        function voltarPaginaPrincipal() {
+            window.location.href = 'index.html';
+        }
+
+        function alternarVisao(tipo) {
+            const secaoGraficos = document.getElementById('secaoGraficos');
+            const secaoTabelas = document.getElementById('secaoTabelas');
+            const btnGraficos = document.getElementById('btnGraficos');
+            const btnTabelas = document.getElementById('btnTabelas');
+
+            if (tipo === 'graficos') {
+                secaoGraficos.classList.remove('hidden');
+                secaoTabelas.classList.add('hidden');
+                btnGraficos.classList.add('active');
+                btnTabelas.classList.remove('active');
+            } else {
+                secaoGraficos.classList.add('hidden');
+                secaoTabelas.classList.remove('hidden');
+                btnTabelas.classList.add('active');
+                btnGraficos.classList.remove('active');
+            }
+        }
+
+        function aplicarFiltros() {
+            const filtroTipo = document.getElementById('filtroTipo').value;
+            const ordenacao = document.getElementById('ordenacao').value;
+            bimestreAtual = document.getElementById('bimestreSelect').value;
+
+            // Aplicar filtro
+            if (filtroTipo === 'todas') {
+                dadosFiltrados = [...dadosEscolas];
+            } else if (filtroTipo === 'pei') {
+                dadosFiltrados = dadosEscolas.filter(escola => escola.tipo === 'pei');
+            } else {
+                dadosFiltrados = dadosEscolas.filter(escola => escola.tipo === filtroTipo);
+            }
+
+            // Aplicar ordenação
+            dadosFiltrados.sort((a, b) => {
+                if (ordenacao === 'nome') return a.nome.localeCompare(b.nome);
+                const dadosA = obterDadosBimestre(a, bimestreAtual);
+                const dadosB = obterDadosBimestre(b, bimestreAtual);
+                return dadosB[ordenacao] - dadosA[ordenacao];
+            });
+
+            // Recriar visualizações
+            criarGraficos();
+            criarTabelas();
+            // Nota: Gráficos da Prova Paulista sempre mostram todos os dados, não são filtrados
+            criarGraficosProvaPaulista();
+        }
+
+        function criarGraficos() {
+            console.log('=== INICIANDO CRIAÇÃO DOS GRÁFICOS ===');
+            console.log('bimestreAtual:', bimestreAtual);
+            console.log('dadosFiltrados length:', dadosFiltrados.length);
+            
+            // Destruir gráficos existentes primeiro
+            destruirGraficos();
+            
+            criarGraficoBarrasGeral();
+            criarGraficoLinhaEvolucao();
+            criarGraficoRadar();
+            
+            console.log('=== CRIANDO GRÁFICOS DE DISPERSÃO ===');
+            try {
+                criarGraficosDispersao();
+                console.log('✅ Gráficos de dispersão criados com sucesso');
+            } catch (error) {
+                console.error('❌ Erro ao criar gráficos de dispersão:', error);
+            }
+            
+            console.log('=== CRIANDO MATRIZ DE CORRELAÇÃO ===');
+            try {
+                criarMatrizCorrelacao();
+                console.log('✅ Matriz de correlação criada com sucesso');
+            } catch (error) {
+                console.error('❌ Erro ao criar matriz de correlação:', error);
+            }
+            
+            console.log('=== CRIANDO ANÁLISE DE GRUPOS ===');
+            try {
+                criarAnaliseGrupos();
+                console.log('✅ Análise de grupos criada com sucesso');
+            } catch (error) {
+                console.error('❌ Erro ao criar análise de grupos:', error);
+            }
+            
+            atualizarResumoEstatistico();
+            console.log('Gráficos criados com sucesso!');
+        }
+
+        function criarGraficoBarrasGeral() {
+            const ctx = document.getElementById('graficoBarrasGeral').getContext('2d');
+            
+            if (graficosAtivos['graficoBarrasGeral']) {
+                graficosAtivos['graficoBarrasGeral'].destroy();
+                delete graficosAtivos['graficoBarrasGeral'];
+            }
+
+            const dados = dadosFiltrados.slice(0, 15); // Mostrar apenas top 15 para legibilidade
+            
+            if (bimestreAtual === 'evolucao') {
+                // Mostrar evolução dos 3 bimestres
+                const datasets = [
+                    {
+                        label: '1º Bimestre',
+                        data: dados.map(e => obterDadosBimestre(e, 'bimestre1').superbi),
+                        backgroundColor: '#EF4444',
+                        borderColor: '#DC2626',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '2º Bimestre',
+                        data: dados.map(e => obterDadosBimestre(e, 'bimestre2').superbi),
+                        backgroundColor: '#F59E0B',
+                        borderColor: '#D97706',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '3º Bimestre',
+                        data: dados.map(e => obterDadosBimestre(e, 'bimestre3').superbi),
+                        backgroundColor: '#10B981',
+                        borderColor: '#059669',
+                        borderWidth: 1
+                    }
+                ];
+
+                graficosAtivos['graficoBarrasGeral'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dados.map(e => e.nome.replace('EE ', '').replace('PEI ', '')),
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 7,
+                                max: 10
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Mostrar dados do bimestre específico
+                const nomeBimestre = bimestreAtual === 'bimestre1' ? '1º Bimestre' : 
+                                   bimestreAtual === 'bimestre2' ? '2º Bimestre' : '3º Bimestre';
+                
+                graficosAtivos['graficoBarrasGeral'] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dados.map(e => e.nome.replace('EE ', '').replace('PEI ', '')),
+                        datasets: [{
+                            label: `Score Super BI - ${nomeBimestre}`,
+                            data: dados.map(e => obterDadosBimestre(e, bimestreAtual).superbi),
+                            backgroundColor: dados.map(e => 
+                                e.tipo === 'pei' ? '#8B5CF6' : '#3B82F6'
+                            ),
+                            borderColor: dados.map(e => 
+                                e.tipo === 'pei' ? '#7C3AED' : '#2563EB'
+                            ),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                min: 7,
+                                max: 10
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    afterLabel: function(context) {
+                                        const escola = dados[context.dataIndex];
+                                        return `Tipo: ${escola.tipo.toUpperCase()}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
+
+        function criarGraficoLinhaEvolucao() {
+            const ctx = document.getElementById('graficoLinhaEvolucao').getContext('2d');
+            
+            if (graficosAtivos['graficoLinhaEvolucao']) {
+                graficosAtivos['graficoLinhaEvolucao'].destroy();
+                delete graficosAtivos['graficoLinhaEvolucao'];
+            }
+
+            // Ordenar por 3º bimestre para pegar as top 5
+            const top5 = [...dadosFiltrados].sort((a, b) => 
+                obterDadosBimestre(b, 'bimestre3').superbi - obterDadosBimestre(a, 'bimestre3').superbi
+            ).slice(0, 5);
+            
+            const bimestres = ['1º Bimestre', '2º Bimestre', '3º Bimestre'];
+
+            const datasets = top5.map((escola, index) => {
+                const cores = ['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6'];
+                
+                return {
+                    label: escola.nome.replace('EE ', '').replace('PEI ', ''),
+                    data: [
+                        obterDadosBimestre(escola, 'bimestre1').superbi,
+                        obterDadosBimestre(escola, 'bimestre2').superbi,
+                        obterDadosBimestre(escola, 'bimestre3').superbi
+                    ],
+                    borderColor: cores[index],
+                    backgroundColor: cores[index] + '20',
+                    tension: 0.4,
+                    fill: false,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                };
+            });
+
+            graficosAtivos['graficoLinhaEvolucao'] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: bimestres,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 7,
+                            max: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoRadar() {
+            const ctx = document.getElementById('graficoRadar').getContext('2d');
+            
+            if (graficosAtivos['graficoRadar']) {
+                graficosAtivos['graficoRadar'].destroy();
+                delete graficosAtivos['graficoRadar'];
+            }
+
+            // Usar bimestre atual ou 3º se for evolução
+            const bimestreParaRadar = bimestreAtual === 'evolucao' ? 'bimestre3' : bimestreAtual;
+            
+            // Criar datasets para todas as escolas por tipo
+            const escolasRegulares = dadosFiltrados.filter(e => e.tipo === 'regular');
+            const escolasPEI = dadosFiltrados.filter(e => e.tipo === 'pei');
+
+            const datasets = [];
+
+            // Calcular médias por tipo
+            if (escolasRegulares.length > 0) {
+                const mediaRegular = calcularMediaPorTipo(escolasRegulares, bimestreParaRadar);
+                datasets.push({
+                    label: 'Média Escolas Regulares',
+                    data: [mediaRegular.superbi, mediaRegular.frequencia/10, mediaRegular.alura, mediaRegular.khan, mediaRegular.provaPaulista, mediaRegular.tarefas],
+                    borderColor: '#3B82F6',
+                    backgroundColor: '#3B82F620',
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#3B82F6',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#3B82F6'
+                });
+            }
+
+            if (escolasPEI.length > 0) {
+                const mediaPEI = calcularMediaPorTipo(escolasPEI, bimestreParaRadar);
+                datasets.push({
+                    label: 'Média Escolas PEI',
+                    data: [mediaPEI.superbi, mediaPEI.frequencia/10, mediaPEI.alura, mediaPEI.khan, mediaPEI.provaPaulista, mediaPEI.tarefas],
+                    borderColor: '#8B5CF6',
+                    backgroundColor: '#8B5CF620',
+                    pointBackgroundColor: '#8B5CF6',
+                    pointBorderColor: '#8B5CF6',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#8B5CF6'
+                });
+            }
+
+            graficosAtivos['graficoRadar'] = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Super BI', 'Frequência', 'ALURA', 'KHAN', 'Prova Paulista', 'Tarefas'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                stepSize: 2
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarTabelas() {
+            criarTabelaPrincipal();
+            criarRankings();
+        }
+
+        function criarTabelaPrincipal() {
+            const tbody = document.getElementById('corpoTabela');
+            tbody.innerHTML = '';
+
+            dadosFiltrados.forEach(escola => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-gray-50';
+                
+                const tipoClass = escola.tipo === 'pei' ? 'text-purple-600 font-semibold' : 'text-blue-600';
+                
+                // Usar dados do bimestre selecionado ou do 3º bimestre se for evolução
+                const bimestreParaTabela = bimestreAtual === 'evolucao' ? 'bimestre3' : bimestreAtual;
+                const dados = obterDadosBimestre(escola, bimestreParaTabela);
+                
+                const scoreBg = dados.superbi >= 9 ? 'bg-green-100 text-green-800' : 
+                               dados.superbi >= 8.5 ? 'bg-yellow-100 text-yellow-800' : 
+                               'bg-red-100 text-red-800';
+
+                // Calcular evolução do 1º ao 3º bimestre
+                const evolucao = obterDadosBimestre(escola, 'bimestre3').superbi - obterDadosBimestre(escola, 'bimestre1').superbi;
+                const evolucaoClass = evolucao >= 0.5 ? 'text-green-600' : evolucao >= 0 ? 'text-yellow-600' : 'text-red-600';
+                const evolucaoIcon = evolucao >= 0.5 ? '📈' : evolucao >= 0 ? '➡️' : '📉';
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-medium">${escola.nome}</td>
+                    <td class="px-4 py-3 ${tipoClass}">${
+                        escola.tipo === 'pei' ? 'PEI' : 'REGULAR'
+                    }</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="px-2 py-1 rounded-full text-sm font-medium ${scoreBg}">
+                            ${dados.superbi.toFixed(2)}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-center">${dados.frequencia.toFixed(1)}%</td>
+                    <td class="px-4 py-3 text-center">${dados.alura.toFixed(1)}</td>
+                    <td class="px-4 py-3 text-center">${dados.khan.toFixed(1)}</td>
+                    <td class="px-4 py-3 text-center">${dados.provaPaulista.toFixed(1)}</td>
+                    <td class="px-4 py-3 text-center">${dados.tarefas.toFixed(1)}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="font-semibold ${evolucaoClass}">
+                            ${evolucaoIcon} ${evolucao >= 0 ? '+' : ''}${evolucao.toFixed(2)}
+                        </span>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        function criarRankings() {
+            const bimestreParaRanking = bimestreAtual === 'evolucao' ? 'bimestre3' : bimestreAtual;
+            
+            // Ranking Super BI
+            const topSuperBI = [...dadosFiltrados].sort((a, b) => 
+                obterDadosBimestre(b, bimestreParaRanking).superbi - obterDadosBimestre(a, bimestreParaRanking).superbi
+            ).slice(0, 10);
+            const rankingSuperBI = document.getElementById('rankingSuperBI');
+            rankingSuperBI.innerHTML = topSuperBI.map((escola, index) => `
+                <div class="flex items-center justify-between py-2 px-3 ${index < 3 ? 'bg-yellow-50' : ''}">
+                    <div class="flex items-center">
+                        <span class="w-6 h-6 rounded-full ${index < 3 ? 'bg-yellow-400' : 'bg-gray-200'} flex items-center justify-center text-sm font-bold mr-3">
+                            ${index + 1}
+                        </span>
+                        <span class="text-sm font-medium">${escola.nome.replace('EE ', '').replace('PEI ', '')}</span>
+                    </div>
+                    <span class="font-bold text-blue-600">${obterDadosBimestre(escola, bimestreParaRanking).superbi.toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            // Ranking Frequência
+            const topFrequencia = [...dadosFiltrados].sort((a, b) => 
+                obterDadosBimestre(b, bimestreParaRanking).frequencia - obterDadosBimestre(a, bimestreParaRanking).frequencia
+            ).slice(0, 10);
+            const rankingFrequencia = document.getElementById('rankingFrequencia');
+            rankingFrequencia.innerHTML = topFrequencia.map((escola, index) => `
+                <div class="flex items-center justify-between py-2 px-3 ${index < 3 ? 'bg-green-50' : ''}">
+                    <div class="flex items-center">
+                        <span class="w-6 h-6 rounded-full ${index < 3 ? 'bg-green-400' : 'bg-gray-200'} flex items-center justify-center text-sm font-bold mr-3">
+                            ${index + 1}
+                        </span>
+                        <span class="text-sm font-medium">${escola.nome.replace('EE ', '').replace('PEI ', '')}</span>
+                    </div>
+                    <span class="font-bold text-green-600">${obterDadosBimestre(escola, bimestreParaRanking).frequencia.toFixed(1)}%</span>
+                </div>
+            `).join('');
+        }
+
+        // Função auxiliar para calcular média por tipo
+        function calcularMediaPorTipo(escolas, bimestre) {
+            const total = escolas.length;
+            const soma = escolas.reduce((acc, escola) => {
+                const dados = obterDadosBimestre(escola, bimestre);
+                return {
+                    superbi: acc.superbi + dados.superbi,
+                    frequencia: acc.frequencia + dados.frequencia,
+                    alura: acc.alura + dados.alura,
+                    khan: acc.khan + dados.khan,
+                    provaPaulista: acc.provaPaulista + dados.provaPaulista,
+                    tarefas: acc.tarefas + dados.tarefas
+                };
+            }, { superbi: 0, frequencia: 0, alura: 0, khan: 0, provaPaulista: 0, tarefas: 0 });
+
+            return {
+                superbi: soma.superbi / total,
+                frequencia: soma.frequencia / total,
+                alura: soma.alura / total,
+                khan: soma.khan / total,
+                provaPaulista: soma.provaPaulista / total,
+                tarefas: soma.tarefas / total
+            };
+        }
+
+        // Função para calcular correlação
+        function calcularCorrelacao(array1, array2) {
+            const n = array1.length;
+            const sum1 = array1.reduce((a, b) => a + b, 0);
+            const sum2 = array2.reduce((a, b) => a + b, 0);
+            const sum1Sq = array1.reduce((a, b) => a + b * b, 0);
+            const sum2Sq = array2.reduce((a, b) => a + b * b, 0);
+            const pSum = array1.map((x, i) => x * array2[i]).reduce((a, b) => a + b, 0);
+            
+            const num = pSum - (sum1 * sum2 / n);
+            const den = Math.sqrt((sum1Sq - sum1 * sum1 / n) * (sum2Sq - sum2 * sum2 / n));
+            
+            return den === 0 ? 0 : num / den;
+        }
+
+        function criarGraficosDispersao() {
+            const bimestreParaDispersao = bimestreAtual === 'evolucao' ? 'bimestre3' : bimestreAtual;
+            
+            // Verificar se os elementos existem antes de criar os gráficos
+            if (document.getElementById('graficoDispersaoAlura')) {
+                criarGraficoDispersao('graficoDispersaoAlura', 'alura', 'ALURA', bimestreParaDispersao);
+            }
+            if (document.getElementById('graficoDispersaoKhan')) {
+                criarGraficoDispersao('graficoDispersaoKhan', 'khan', 'KHAN', bimestreParaDispersao);
+            }
+            if (document.getElementById('graficoDispersaoFrequencia')) {
+                criarGraficoDispersao('graficoDispersaoFrequencia', 'frequencia', 'Frequência', bimestreParaDispersao);
+            }
+            if (document.getElementById('graficoDispersaoProva')) {
+                criarGraficoDispersao('graficoDispersaoProva', 'provaPaulista', 'Prova Paulista', bimestreParaDispersao);
+            }
+        }
+
+        function criarGraficoDispersao(canvasId, propriedade, titulo, bimestre) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.error(`Canvas ${canvasId} não encontrado`);
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            
+            // Destruir gráfico existente se houver
+            if (graficosAtivos[canvasId]) {
+                graficosAtivos[canvasId].destroy();
+                delete graficosAtivos[canvasId];
+            }
+
+            const dadosDispersao = dadosFiltrados.map(escola => {
+                const dados = obterDadosBimestre(escola, bimestre);
+                return {
+                    x: dados[propriedade],
+                    y: dados.superbi,
+                    escola: escola.nome,
+                    tipo: escola.tipo
+                };
+            });
+
+            const datasets = [
+                {
+                    label: 'Escolas Regulares',
+                    data: dadosDispersao.filter(d => d.tipo === 'regular'),
+                    backgroundColor: '#3B82F6',
+                    borderColor: '#2563EB',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Escolas PEI',
+                    data: dadosDispersao.filter(d => d.tipo === 'pei'),
+                    backgroundColor: '#8B5CF6',
+                    borderColor: '#7C3AED',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }
+            ];
+
+            graficosAtivos[canvasId] = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: titulo + (propriedade === 'frequencia' ? ' (%)' : ' (Score)')
+                            },
+                            min: propriedade === 'frequencia' ? 80 : 6,
+                            max: propriedade === 'frequencia' ? 100 : 10
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Super BI (Score)'
+                            },
+                            min: 7,
+                            max: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].raw.escola;
+                                },
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return [
+                                        `${titulo}: ${point.x.toFixed(1)}${propriedade === 'frequencia' ? '%' : ''}`,
+                                        `Super BI: ${point.y.toFixed(2)}`,
+                                        `Tipo: ${point.tipo === 'regular' ? 'Regular' : 'PEI'}`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarMatrizCorrelacao() {
+            const tbody = document.getElementById('corpoTabelaCorrelacao');
+            if (!tbody) {
+                console.error('Elemento corpoTabelaCorrelacao não encontrado');
+                return;
+            }
+
+            const bimestreParaCorrelacao = bimestreAtual === 'evolucao' ? 'bimestre3' : bimestreAtual;
+            
+            const indicadores = ['superbi', 'frequencia', 'alura', 'khan', 'provaPaulista', 'tarefas'];
+            const nomes = ['Super BI', 'Frequência', 'ALURA', 'KHAN', 'P. Paulista', 'Tarefas'];
+            
+            const dados = {};
+            indicadores.forEach(ind => {
+                dados[ind] = dadosFiltrados.map(escola => obterDadosBimestre(escola, bimestreParaCorrelacao)[ind]);
+            });
+
+            tbody.innerHTML = '';
+
+            indicadores.forEach((ind1, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="border px-4 py-2 font-medium">${nomes[i]}</td>`;
+                
+                indicadores.forEach(ind2 => {
+                    const correlacao = calcularCorrelacao(dados[ind1], dados[ind2]);
+                    const corClass = Math.abs(correlacao) >= 0.7 ? 'bg-green-100 text-green-800' :
+                                   Math.abs(correlacao) >= 0.5 ? 'bg-yellow-100 text-yellow-800' :
+                                   'bg-red-100 text-red-800';
+                    
+                    tr.innerHTML += `<td class="border px-4 py-2 text-center ${corClass}">${correlacao.toFixed(3)}</td>`;
+                });
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        function criarAnaliseGrupos() {
+            const container = document.getElementById('analiseGrupos');
+            if (!container) {
+                console.error('Elemento analiseGrupos não encontrado');
+                return;
+            }
+
+            const bimestreParaGrupos = bimestreAtual === 'evolucao' ? 'bimestre3' : bimestreAtual;
+            
+            const grupos = {
+                'Alto Desempenho': dadosFiltrados.filter(e => obterDadosBimestre(e, bimestreParaGrupos).superbi >= 9.0),
+                'Médio Desempenho': dadosFiltrados.filter(e => {
+                    const score = obterDadosBimestre(e, bimestreParaGrupos).superbi;
+                    return score >= 8.0 && score < 9.0;
+                }),
+                'Baixo Desempenho': dadosFiltrados.filter(e => obterDadosBimestre(e, bimestreParaGrupos).superbi < 8.0)
+            };
+
+            container.innerHTML = '';
+
+            Object.entries(grupos).forEach(([nome, escolas], index) => {
+                if (escolas.length === 0) return;
+
+                const cores = ['bg-green-50 border-green-200', 'bg-yellow-50 border-yellow-200', 'bg-red-50 border-red-200'];
+                const textCores = ['text-green-800', 'text-yellow-800', 'text-red-800'];
+
+                const media = calcularMediaPorTipo(escolas, bimestreParaGrupos);
+                
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-lg border-2 ${cores[index]}`;
+                div.innerHTML = `
+                    <h4 class="font-bold text-lg ${textCores[index]} mb-2">${nome}</h4>
+                    <p class="text-sm mb-2">${escolas.length} escolas</p>
+                    <div class="space-y-1 text-xs">
+                        <div>Super BI: ${media.superbi.toFixed(2)}</div>
+                        <div>Frequência: ${media.frequencia.toFixed(1)}%</div>
+                        <div>ALURA: ${media.alura.toFixed(1)}</div>
+                        <div>KHAN: ${media.khan.toFixed(1)}</div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-600">
+                        ${escolas.map(e => e.nome.replace('EE ', '').replace('PEI ', '')).join(', ')}
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function atualizarResumoEstatistico() {
+            const bimestreParaEstatistica = bimestreAtual === 'evolucao' ? 'bimestre3' : bimestreAtual;
+            
+            const mediaGeral = dadosFiltrados.reduce((acc, escola) => 
+                acc + obterDadosBimestre(escola, bimestreParaEstatistica).superbi, 0) / dadosFiltrados.length;
+            const melhorEscola = Math.max(...dadosFiltrados.map(e => 
+                obterDadosBimestre(e, bimestreParaEstatistica).superbi));
+            const mediaFrequencia = dadosFiltrados.reduce((acc, escola) => 
+                acc + obterDadosBimestre(escola, bimestreParaEstatistica).frequencia, 0) / dadosFiltrados.length;
+            const escolasPEI = dadosFiltrados.filter(e => e.tipo === 'pei').length;
+
+            document.getElementById('mediaGeral').textContent = mediaGeral.toFixed(2);
+            document.getElementById('melhorEscola').textContent = melhorEscola.toFixed(2);
+            document.getElementById('mediaFrequencia').textContent = mediaFrequencia.toFixed(1) + '%';
+            document.getElementById('escolasPEI').textContent = escolasPEI;
+        }
+
+        // ==================== FUNÇÕES PROVA PAULISTA ====================
+        
+        function criarGraficosProvaPaulista() {
+            console.log('=== CRIANDO GRÁFICOS PROVA PAULISTA ===');
+            criarEstatisticasProvaPaulista();
+            criarGraficoProvaPaulistaRanking();
+            criarGraficoProvaPaulistaEvolucao();
+            criarGraficoProvaPaulistaVsSuperBI();
+            criarGraficoProvaPaulistaPorTipo();
+            criarTabelaRankingProvaPaulista();
+        }
+
+        function criarEstatisticasProvaPaulista() {
+            // Calcular estatísticas da Prova Paulista - 3º Bimestre
+            const notasPP = dadosEscolas.map(e => e.bimestre3.provaPaulista);
+            const mediaGeral = notasPP.reduce((a, b) => a + b, 0) / notasPP.length;
+            const melhorNota = Math.max(...notasPP);
+            
+            const notasPP1 = dadosEscolas.map(e => e.bimestre1.provaPaulista);
+            const mediaBim1 = notasPP1.reduce((a, b) => a + b, 0) / notasPP1.length;
+            const evolucao = mediaGeral - mediaBim1;
+            
+            const escolasPEI = dadosEscolas.filter(e => e.tipo === 'pei');
+            const mediaPEI = escolasPEI.reduce((acc, e) => acc + e.bimestre3.provaPaulista, 0) / escolasPEI.length;
+            
+            const escolasRegulares = dadosEscolas.filter(e => e.tipo === 'regular');
+            const mediaRegular = escolasRegulares.reduce((acc, e) => acc + e.bimestre3.provaPaulista, 0) / escolasRegulares.length;
+            
+            document.getElementById('ppMediaGeral').textContent = mediaGeral.toFixed(2);
+            document.getElementById('ppMelhorNota').textContent = melhorNota.toFixed(1);
+            document.getElementById('ppEvolucaoMedia').textContent = '+' + evolucao.toFixed(2);
+            document.getElementById('ppMediaPEI').textContent = mediaPEI.toFixed(2);
+            document.getElementById('ppMediaRegular').textContent = mediaRegular.toFixed(2);
+        }
+
+        function criarGraficoProvaPaulistaRanking() {
+            if (graficosAtivos['graficoProvaPaulistaRanking']) {
+                graficosAtivos['graficoProvaPaulistaRanking'].destroy();
+            }
+
+            const ctx = document.getElementById('graficoProvaPaulistaRanking');
+            if (!ctx) return;
+
+            // Ordenar por Prova Paulista do 3º bimestre
+            const top15 = [...dadosEscolas]
+                .sort((a, b) => b.bimestre3.provaPaulista - a.bimestre3.provaPaulista)
+                .slice(0, 15);
+
+            graficosAtivos['graficoProvaPaulistaRanking'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: top15.map(e => e.nome.replace('EE ', '').replace('PEI ', '')),
+                    datasets: [{
+                        label: 'Nota Prova Paulista',
+                        data: top15.map(e => e.bimestre3.provaPaulista),
+                        backgroundColor: top15.map(e => 
+                            e.tipo === 'pei' ? '#8B5CF6' : '#3B82F6'
+                        ),
+                        borderColor: top15.map(e => 
+                            e.tipo === 'pei' ? '#7C3AED' : '#2563EB'
+                        ),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { color: '#f3f4f6' }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoProvaPaulistaEvolucao() {
+            if (graficosAtivos['graficoProvaPaulistaEvolucao']) {
+                graficosAtivos['graficoProvaPaulistaEvolucao'].destroy();
+            }
+
+            const ctx = document.getElementById('graficoProvaPaulistaEvolucao');
+            if (!ctx) return;
+
+            // Top 10 escolas por Prova Paulista no 3º bimestre
+            const top10 = [...dadosEscolas]
+                .sort((a, b) => b.bimestre3.provaPaulista - a.bimestre3.provaPaulista)
+                .slice(0, 10);
+
+            const datasets = top10.map((escola, index) => {
+                const cores = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', 
+                               '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16'];
+                return {
+                    label: escola.nome.replace('EE ', '').replace('PEI ', ''),
+                    data: [
+                        escola.bimestre1.provaPaulista,
+                        escola.bimestre2.provaPaulista,
+                        escola.bimestre3.provaPaulista
+                    ],
+                    borderColor: cores[index],
+                    backgroundColor: cores[index] + '20',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: false
+                };
+            });
+
+            graficosAtivos['graficoProvaPaulistaEvolucao'] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1º Bimestre', '2º Bimestre', '3º Bimestre'],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 9 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 6,
+                            max: 10,
+                            grid: { color: '#f3f4f6' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoProvaPaulistaVsSuperBI() {
+            if (graficosAtivos['graficoProvaPaulistaVsSuperBI']) {
+                graficosAtivos['graficoProvaPaulistaVsSuperBI'].destroy();
+            }
+
+            const ctx = document.getElementById('graficoProvaPaulistaVsSuperBI');
+            if (!ctx) return;
+
+            const dadosDispersao = {
+                regular: dadosEscolas.filter(e => e.tipo === 'regular').map(e => ({
+                    x: e.bimestre3.provaPaulista,
+                    y: e.bimestre3.superbi,
+                    escola: e.nome
+                })),
+                pei: dadosEscolas.filter(e => e.tipo === 'pei').map(e => ({
+                    x: e.bimestre3.provaPaulista,
+                    y: e.bimestre3.superbi,
+                    escola: e.nome
+                }))
+            };
+
+            graficosAtivos['graficoProvaPaulistaVsSuperBI'] = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Escolas Regulares',
+                            data: dadosDispersao.regular,
+                            backgroundColor: '#3B82F6',
+                            borderColor: '#2563EB',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        },
+                        {
+                            label: 'Escolas PEI',
+                            data: dadosDispersao.pei,
+                            backgroundColor: '#8B5CF6',
+                            borderColor: '#7C3AED',
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.raw.escola}: PP=${context.raw.x.toFixed(1)}, SB=${context.raw.y.toFixed(1)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Prova Paulista' },
+                            min: 6.5,
+                            max: 10,
+                            grid: { color: '#f3f4f6' }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: { display: true, text: 'Super BI' },
+                            min: 7,
+                            max: 10,
+                            grid: { color: '#f3f4f6' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoProvaPaulistaPorTipo() {
+            if (graficosAtivos['graficoProvaPaulistaPorTipo']) {
+                graficosAtivos['graficoProvaPaulistaPorTipo'].destroy();
+            }
+
+            const ctx = document.getElementById('graficoProvaPaulistaPorTipo');
+            if (!ctx) return;
+
+            const regular = dadosEscolas.filter(e => e.tipo === 'regular');
+            const pei = dadosEscolas.filter(e => e.tipo === 'pei');
+
+            const calcMedia = (escolas, bim, prop) => 
+                escolas.reduce((acc, e) => acc + e[bim][prop], 0) / escolas.length;
+
+            graficosAtivos['graficoProvaPaulistaPorTipo'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1º Bimestre', '2º Bimestre', '3º Bimestre'],
+                    datasets: [
+                        {
+                            label: 'Escolas Regulares',
+                            data: [
+                                calcMedia(regular, 'bimestre1', 'provaPaulista'),
+                                calcMedia(regular, 'bimestre2', 'provaPaulista'),
+                                calcMedia(regular, 'bimestre3', 'provaPaulista')
+                            ],
+                            backgroundColor: '#3B82F6',
+                            borderColor: '#2563EB',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Escolas PEI',
+                            data: [
+                                calcMedia(pei, 'bimestre1', 'provaPaulista'),
+                                calcMedia(pei, 'bimestre2', 'provaPaulista'),
+                                calcMedia(pei, 'bimestre3', 'provaPaulista')
+                            ],
+                            backgroundColor: '#8B5CF6',
+                            borderColor: '#7C3AED',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 6,
+                            max: 10,
+                            grid: { color: '#f3f4f6' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function criarTabelaRankingProvaPaulista() {
+            const tbody = document.getElementById('tabelaRankingProvaPaulista');
+            if (!tbody) return;
+
+            const ranking = [...dadosEscolas]
+                .sort((a, b) => b.bimestre3.provaPaulista - a.bimestre3.provaPaulista);
+
+            tbody.innerHTML = ranking.map((escola, index) => {
+                const evolucao = escola.bimestre3.provaPaulista - escola.bimestre1.provaPaulista;
+                const corEvolucao = evolucao >= 1.0 ? 'text-green-600' : 
+                                   evolucao >= 0.5 ? 'text-blue-600' : 'text-orange-600';
+                const badge = escola.tipo === 'pei' ? 'PEI' : 'Regular';
+                const badgeColor = escola.tipo === 'pei' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
+
+                return `
+                    <tr class="border-b hover:bg-purple-50">
+                        <td class="px-3 py-2 font-bold">${index + 1}º</td>
+                        <td class="px-3 py-2">${escola.nome}</td>
+                        <td class="px-3 py-2 text-center">
+                            <span class="px-2 py-1 rounded text-xs ${badgeColor}">${badge}</span>
+                        </td>
+                        <td class="px-3 py-2 text-center">${escola.bimestre1.provaPaulista.toFixed(1)}</td>
+                        <td class="px-3 py-2 text-center">${escola.bimestre2.provaPaulista.toFixed(1)}</td>
+                        <td class="px-3 py-2 text-center font-bold text-purple-700">${escola.bimestre3.provaPaulista.toFixed(1)}</td>
+                        <td class="px-3 py-2 text-center ${corEvolucao} font-bold">${evolucao >= 0 ? '+' : ''}${evolucao.toFixed(2)}</td>
+                        <td class="px-3 py-2 text-center">${escola.bimestre3.superbi.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ==================== FIM FUNÇÕES PROVA PAULISTA ====================
+    </script>
+</body>
+</html>

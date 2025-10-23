@@ -1,0 +1,245 @@
+<div class="comparativo-container">
+  <!-- Header -->
+  <header class="gradient-bg text-white">
+    <div class="container">
+      <div class="header-content">
+        <div>
+          <h1 class="title">⚖️ Análise Comparativa PEI vs Regular</h1>
+          <p class="subtitle">Comparação detalhada entre modelos educacionais</p>
+        </div>
+        <div class="stats-box">
+          <div class="total-escolas">{{ totalEscolas }}</div>
+          <p class="stats-label">Escolas Analisadas</p>
+        </div>
+      </div>
+      <div class="nav-back">
+        <a routerLink="/" class="btn-back">← Voltar ao Sistema</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Carregando dados...</p>
+  </div>
+
+  <!-- Conteúdo -->
+  <div *ngIf="!loading && mediasPorTipo" class="container content">
+    <!-- Resumo Comparativo -->
+    <section class="section">
+      <h2 class="section-title">📊 Resumo Comparativo</h2>
+      <div class="grid-2">
+        <!-- PEI -->
+        <div class="card card-pei">
+          <div class="card-header">
+            <span class="icon">🏛️</span>
+            <div>
+              <h3 class="card-title">Escolas PEI</h3>
+              <p class="card-subtitle">Programa de Ensino Integral</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value text-blue">{{ mediasPorTipo.pei.count }}</div>
+              <p class="stat-label">Escolas</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value text-green">{{ formatarNumero(mediasPorTipo.pei.score_medio) }}</div>
+              <p class="stat-label">Score Médio</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value text-purple">{{ formatarNumero(mediasPorTipo.pei.frequencia_media) }}%</div>
+              <p class="stat-label">Frequência</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value text-orange">{{ formatarNumero(mediasPorTipo.pei.rendimento_medio) }}</div>
+              <p class="stat-label">Rendimento</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Regular -->
+        <div class="card card-regular">
+          <div class="card-header">
+            <span class="icon">🏫</span>
+            <div>
+              <h3 class="card-title">Escolas Regulares</h3>
+              <p class="card-subtitle">Ensino Regular</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value text-blue">{{ mediasPorTipo.regular.count }}</div>
+              <p class="stat-label">Escolas</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value text-green">{{ formatarNumero(mediasPorTipo.regular.score_medio) }}</div>
+              <p class="stat-label">Score Médio</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value text-purple">{{ formatarNumero(mediasPorTipo.regular.frequencia_media) }}%</div>
+              <p class="stat-label">Frequência</p>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value text-orange">{{ formatarNumero(mediasPorTipo.regular.rendimento_medio) }}</div>
+              <p class="stat-label">Rendimento</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gráficos Comparativos -->
+    <section class="section">
+      <h2 class="section-title">📈 Análise Gráfica Comparativa</h2>
+      <div class="grid-2 mb-6">
+        <!-- Comparação Geral -->
+        <div class="card">
+          <h3 class="chart-title">📊 Comparação Geral</h3>
+          <div class="chart-container">
+            <canvas id="graficoComparacaoGeral"></canvas>
+          </div>
+        </div>
+
+        <!-- Radar Comparativo -->
+        <div class="card">
+          <h3 class="chart-title">🎯 Radar Comparativo</h3>
+          <div class="chart-container">
+            <canvas id="radarComparativo"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evolução Temporal -->
+      <div class="card mb-6">
+        <h3 class="chart-title">📅 Evolução Temporal por Tipo</h3>
+        <div class="chart-container">
+          <canvas id="graficoEvolucaoTemporal"></canvas>
+        </div>
+      </div>
+
+      <!-- Distribuição de Scores -->
+      <div class="card">
+        <h3 class="chart-title">📈 Distribuição de Scores Super BI</h3>
+        <div class="chart-container">
+          <canvas id="graficoDistribuicao"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Análise Detalhada -->
+    <section class="section">
+      <h2 class="section-title">🔍 Análise Detalhada</h2>
+      <div class="grid-3">
+        <!-- Performance por Componente -->
+        <div class="card">
+          <h3 class="chart-title">⚡ Performance por Componente</h3>
+          <div class="performance-list">
+            <div class="performance-item">
+              <span class="performance-label">Frequência:</span>
+              <div class="performance-values">
+                <span class="text-blue">PEI: {{ formatarNumero(mediasPorTipo.pei.frequencia_media) }}%</span>
+                <span class="text-green">REG: {{ formatarNumero(mediasPorTipo.regular.frequencia_media) }}%</span>
+              </div>
+            </div>
+            <div class="performance-item">
+              <span class="performance-label">Rendimento:</span>
+              <div class="performance-values">
+                <span class="text-blue">PEI: {{ formatarNumero(mediasPorTipo.pei.rendimento_medio) }}</span>
+                <span class="text-green">REG: {{ formatarNumero(mediasPorTipo.regular.rendimento_medio) }}</span>
+              </div>
+            </div>
+            <div class="performance-item">
+              <span class="performance-label">Aprovação:</span>
+              <div class="performance-values">
+                <span class="text-blue">PEI: {{ formatarNumero(mediasPorTipo.pei.aprovacao_media) }}%</span>
+                <span class="text-green">REG: {{ formatarNumero(mediasPorTipo.regular.aprovacao_media) }}%</span>
+              </div>
+            </div>
+            <div class="performance-item">
+              <span class="performance-label">Plataformas:</span>
+              <div class="performance-values">
+                <span class="text-blue">PEI: {{ formatarNumero(mediasPorTipo.pei.plataformas_media) }}%</span>
+                <span class="text-green">REG: {{ formatarNumero(mediasPorTipo.regular.plataformas_media) }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="card">
+          <h3 class="chart-title">📊 Estatísticas</h3>
+          <div class="stats-detail">
+            <div class="stat-detail-item">
+              <h4>Diferença Média:</h4>
+              <div class="stat-detail-value text-blue">+{{ formatarNumero(diferencaMedia) }}</div>
+              <p class="stat-detail-label">PEI vs Regular</p>
+            </div>
+            <div class="stat-detail-item">
+              <h4>Melhor Performance:</h4>
+              <div class="stat-detail-value text-green">{{ melhorPerformance }}</div>
+              <p class="stat-detail-label">Em todos os componentes</p>
+            </div>
+            <div class="stat-detail-item">
+              <h4>Taxa de Excelência:</h4>
+              <div class="stat-detail-small">
+                <div>PEI: <span class="text-blue">{{ formatarNumero(taxaExcelenciaPEI, 0) }}%</span></div>
+                <div>REG: <span class="text-green">{{ formatarNumero(taxaExcelenciaRegular, 0) }}%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recomendações -->
+        <div class="card">
+          <h3 class="chart-title">💡 Recomendações</h3>
+          <div class="recomendacoes">
+            <div class="recomendacao recomendacao-blue">
+              <p><strong>PEI:</strong> Manter padrão de excelência e compartilhar boas práticas</p>
+            </div>
+            <div class="recomendacao recomendacao-green">
+              <p><strong>Regular:</strong> Implementar metodologias utilizadas nas escolas PEI</p>
+            </div>
+            <div class="recomendacao recomendacao-yellow">
+              <p><strong>Rede:</strong> Promover intercâmbio de experiências entre tipos</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de Escolas -->
+    <section class="section">
+      <h2 class="section-title">🏫 Lista Completa de Escolas</h2>
+      <div class="grid-2">
+        <!-- Escolas PEI -->
+        <div class="card">
+          <h3 class="chart-title">
+            🏛️ Escolas PEI 
+            <span class="badge badge-blue">{{ mediasPorTipo.pei.count }} unidades</span>
+          </h3>
+          <div class="escola-list">
+            <div *ngFor="let escola of ordenarEscolas(mediasPorTipo.pei.escolas)" class="escola-item">
+              <span class="escola-nome">{{ escola.nome }}</span>
+              <span class="escola-score text-blue">{{ formatarNumero(escola.score_super_bi) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Escolas Regulares -->
+        <div class="card">
+          <h3 class="chart-title">
+            🏫 Escolas Regulares 
+            <span class="badge badge-green">{{ mediasPorTipo.regular.count }} unidades</span>
+          </h3>
+          <div class="escola-list">
+            <div *ngFor="let escola of ordenarEscolas(mediasPorTipo.regular.escolas)" class="escola-item">
+              <span class="escola-nome">{{ escola.nome }}</span>
+              <span class="escola-score text-green">{{ formatarNumero(escola.score_super_bi) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
