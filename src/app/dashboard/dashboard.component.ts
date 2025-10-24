@@ -31,7 +31,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   
   // Tabela
   escolasOrdenadas: Escola[] = [];
-  sortColumn: string = 'score_3bim';
+  sortColumn: string = 'score_super_bi';
   sortDirection: 'asc' | 'desc' = 'desc';
 
   constructor(private escolaService: EscolaService) {}
@@ -72,17 +72,18 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         }, 100);
       });
 
-    this.escolaService.resumo$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(resumo => {
-        this.resumo = resumo;
-      });
+    // TODO: Add resumo$ and mediasPorTipo$ observables to EscolaService if needed
+    // this.escolaService.resumo$
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(resumo => {
+    //     this.resumo = resumo;
+    //   });
 
-    this.escolaService.mediasPorTipo$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(medias => {
-        this.mediasPorTipo = medias;
-      });
+    // this.escolaService.mediasPorTipo$
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(medias => {
+    //     this.mediasPorTipo = medias;
+    //   });
   }
 
   private calcularKPIs(): void {
@@ -90,18 +91,18 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.totalEscolas = this.escolas.length;
     
-    // Frequência média do 3º bimestre
-    const somaFreq = this.escolas.reduce((sum, e) => sum + (e.frequencia_3bim || 0), 0);
+    // Frequência média do 2º bimestre
+    const somaFreq = this.escolas.reduce((sum, e) => sum + (e.frequencia_2bi || 0), 0);
     this.frequenciaMedia = somaFreq / this.totalEscolas;
     
-    // Score médio do 3º bimestre
-    const somaScore = this.escolas.reduce((sum, e) => sum + (e.score_3bim || 0), 0);
+    // Score médio (score_super_bi)
+    const somaScore = this.escolas.reduce((sum, e) => sum + (e.score_super_bi || 0), 0);
     this.scoreMedio = somaScore / this.totalEscolas;
     
-    // Melhoria geral (1º vs 3º bimestre)
-    const somaScore1 = this.escolas.reduce((sum, e) => sum + (e.score_1bim || 0), 0);
-    const mediaScore1 = somaScore1 / this.totalEscolas;
-    this.melhoriaGeral = this.scoreMedio - mediaScore1;
+    // Melhoria geral (1º vs 2º bimestre)
+    const somaFreq1 = this.escolas.reduce((sum, e) => sum + (e.frequencia_1bi || 0), 0);
+    const mediaFreq1 = somaFreq1 / this.totalEscolas;
+    this.melhoriaGeral = this.frequenciaMedia - mediaFreq1;
   }
 
   private criarGraficos(): void {
@@ -125,25 +126,26 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         labels: escolasOrdenadas.map(e => e.nome),
         datasets: [
           {
-            label: '1º Bimestre',
-            data: escolasOrdenadas.map(e => e.score_1bim),
+            label: 'Frequência 1º Bi',
+            data: escolasOrdenadas.map(e => e.frequencia_1bi),
             backgroundColor: 'rgba(59, 130, 246, 0.7)',
             borderColor: 'rgba(59, 130, 246, 1)',
             borderWidth: 1
           },
           {
-            label: '2º Bimestre',
-            data: escolasOrdenadas.map(e => e.score_2bim),
+            label: 'Frequência 2º Bi',
+            data: escolasOrdenadas.map(e => e.frequencia_2bi),
             backgroundColor: 'rgba(16, 185, 129, 0.7)',
             borderColor: 'rgba(16, 185, 129, 1)',
             borderWidth: 1
           },
           {
-            label: '3º Bimestre',
-            data: escolasOrdenadas.map(e => e.score_3bim),
+            label: 'Score Super BI',
+            data: escolasOrdenadas.map(e => e.score_super_bi),
             backgroundColor: 'rgba(139, 92, 246, 0.7)',
             borderColor: 'rgba(139, 92, 246, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            yAxisID: 'y1'
           }
         ]
       },
@@ -153,7 +155,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         plugins: {
           title: {
             display: true,
-            text: 'Performance Geral - 26 Escolas (Evolução por Bimestre)',
+            text: 'Performance Geral - 26 Escolas',
             font: { size: 16, weight: 'bold' }
           },
           legend: {
@@ -172,10 +174,22 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         scales: {
           y: {
             beginAtZero: true,
-            max: 10,
+            max: 100,
+            title: {
+              display: true,
+              text: 'Frequência (%)'
+            }
+          },
+          y1: {
+            beginAtZero: true,
+            max: 100,
+            position: 'right',
             title: {
               display: true,
               text: 'Score Super BI'
+            },
+            grid: {
+              drawOnChartArea: false
             }
           },
           x: {
@@ -199,25 +213,40 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!ctx) return;
 
     // Calcular médias por bimestre
-    const media1bim = this.escolas.reduce((sum, e) => sum + e.score_1bim, 0) / this.totalEscolas;
-    const media2bim = this.escolas.reduce((sum, e) => sum + e.score_2bim, 0) / this.totalEscolas;
-    const media3bim = this.escolas.reduce((sum, e) => sum + e.score_3bim, 0) / this.totalEscolas;
+    const mediaFreq1 = this.escolas.reduce((sum, e) => sum + e.frequencia_1bi, 0) / this.totalEscolas;
+    const mediaFreq2 = this.escolas.reduce((sum, e) => sum + e.frequencia_2bi, 0) / this.totalEscolas;
+    const mediaRend1 = this.escolas.reduce((sum, e) => sum + e.rendimento_1bi, 0) / this.totalEscolas;
+    const mediaRend2 = this.escolas.reduce((sum, e) => sum + e.rendimento_2bi, 0) / this.totalEscolas;
 
     this.evolutionChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['1º Bimestre', '2º Bimestre', '3º Bimestre'],
-        datasets: [{
-          label: 'Média da Rede',
-          data: [media1bim, media2bim, media3bim],
-          borderColor: 'rgba(99, 102, 241, 1)',
-          backgroundColor: 'rgba(99, 102, 241, 0.1)',
-          borderWidth: 3,
-          tension: 0.3,
-          fill: true,
-          pointRadius: 6,
-          pointHoverRadius: 8
-        }]
+        labels: ['1º Bimestre', '2º Bimestre'],
+        datasets: [
+          {
+            label: 'Frequência Média',
+            data: [mediaFreq1, mediaFreq2],
+            borderColor: 'rgba(99, 102, 241, 1)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true,
+            pointRadius: 6,
+            pointHoverRadius: 8
+          },
+          {
+            label: 'Rendimento Médio',
+            data: [mediaRend1, mediaRend2],
+            borderColor: 'rgba(16, 185, 129, 1)',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 3,
+            tension: 0.3,
+            fill: true,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            yAxisID: 'y1'
+          }
+        ]
       },
       options: {
         responsive: true,
@@ -225,7 +254,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         plugins: {
           title: {
             display: true,
-            text: 'Evolução da Rede: 1º vs 2º vs 3º Bimestre',
+            text: 'Evolução da Rede: 1º vs 2º Bimestre',
             font: { size: 16, weight: 'bold' }
           },
           legend: {
@@ -235,10 +264,22 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         scales: {
           y: {
             beginAtZero: true,
-            max: 10,
+            max: 100,
             title: {
               display: true,
-              text: 'Score Médio'
+              text: 'Frequência (%)'
+            }
+          },
+          y1: {
+            beginAtZero: true,
+            max: 10,
+            position: 'right',
+            title: {
+              display: true,
+              text: 'Rendimento'
+            },
+            grid: {
+              drawOnChartArea: false
             }
           }
         }
@@ -263,21 +304,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           valorA = a.nome;
           valorB = b.nome;
           break;
-        case 'score_1bim':
-          valorA = a.score_1bim;
-          valorB = b.score_1bim;
+        case 'frequencia_1bi':
+          valorA = a.frequencia_1bi;
+          valorB = b.frequencia_1bi;
           break;
-        case 'score_2bim':
-          valorA = a.score_2bim;
-          valorB = b.score_2bim;
+        case 'frequencia_2bi':
+          valorA = a.frequencia_2bi;
+          valorB = b.frequencia_2bi;
           break;
-        case 'score_3bim':
-          valorA = a.score_3bim;
-          valorB = b.score_3bim;
+        case 'score_super_bi':
+          valorA = a.score_super_bi;
+          valorB = b.score_super_bi;
           break;
         case 'evolucao':
-          valorA = a.score_3bim - a.score_1bim;
-          valorB = b.score_3bim - b.score_1bim;
+          valorA = a.frequencia_2bi - a.frequencia_1bi;
+          valorB = b.frequencia_2bi - b.frequencia_1bi;
           break;
         case 'tipo':
           valorA = a.tipo;
@@ -300,7 +341,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   calcularEvolucao(escola: Escola): number {
-    return escola.score_3bim - escola.score_1bim;
+    return escola.frequencia_2bi - escola.frequencia_1bi;
   }
 
   getCorEvolucao(evolucao: number): string {

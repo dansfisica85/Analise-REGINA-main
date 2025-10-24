@@ -11,6 +11,17 @@ export class EscolaService {
   private dadosCarregados$ = new BehaviorSubject<DadosEscolas | null>(null);
   private readonly DATA_URL = 'assets/static/dados_escolas.json';
 
+  // Observables públicos
+  escolas$ = this.dadosCarregados$.pipe(
+    map(dados => dados?.escolas || [])
+  );
+
+  resumo$ = this.dadosCarregados$.pipe(
+    map(dados => dados?.resumo_rede || null)
+  );
+
+  mediasPorTipo$ = this.calcularMediasPorTipo();
+
   constructor(private http: HttpClient) {
     this.carregarDados();
   }
