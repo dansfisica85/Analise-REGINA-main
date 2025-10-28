@@ -1,1 +1,176 @@
-<p>dashboard works!</p>
+<div class="dashboard-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando dados...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading" class="dashboard-content">
+    <!-- Header -->
+    <header class="dashboard-header">
+      <h1>📊 Dashboard REGINA - Análise Completa</h1>
+      <p class="subtitle">Sistema de análise educacional das escolas da Diretoria de Ensino</p>
+    </header>
+
+    <!-- KPIs Cards -->
+    <section class="kpis-section">
+      <div class="kpi-card">
+        <div class="kpi-icon">🏫</div>
+        <div class="kpi-content">
+          <h3>Total de Escolas</h3>
+          <p class="kpi-value">{{ totalEscolas }}</p>
+          <span class="kpi-label">escolas analisadas</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-content">
+          <h3>Frequência Média</h3>
+          <p class="kpi-value">{{ frequenciaMedia | number:'1.1-1' }}%</p>
+          <span class="kpi-label">2º Bimestre</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-content">
+          <h3>Score Médio</h3>
+          <p class="kpi-value">{{ scoreMedio | number:'1.1-1' }}</p>
+          <span class="kpi-label">Super BI</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" [ngClass]="{
+        'positive': melhoriaGeral > 0,
+        'negative': melhoriaGeral < 0
+      }">
+        <div class="kpi-icon">{{ melhoriaGeral > 0 ? '📈' : '📉' }}</div>
+        <div class="kpi-content">
+          <h3>Evolução</h3>
+          <p class="kpi-value">{{ melhoriaGeral > 0 ? '+' : '' }}{{ melhoriaGeral | number:'1.1-1' }}%</p>
+          <span class="kpi-label">1º vs 2º Bimestre</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="charts-section">
+      <div class="chart-container">
+        <h2>📊 Performance Geral das Escolas</h2>
+        <div class="chart-wrapper">
+          <canvas id="graficoPerformanceGeral"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h2>📈 Evolução da Rede</h2>
+        <div class="chart-wrapper">
+          <canvas id="networkEvolutionChartMain"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Table Section -->
+    <section class="table-section">
+      <h2>📋 Ranking Detalhado das Escolas</h2>
+      
+      <div class="table-controls">
+        <p class="table-info">
+          Mostrando {{ escolasOrdenadas.length }} escolas
+        </p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="schools-table">
+          <thead>
+            <tr>
+              <th (click)="ordenarTabela('nome')" class="sortable">
+                Nome da Escola
+                <span class="sort-indicator" *ngIf="sortColumn === 'nome'">
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenarTabela('tipo')" class="sortable text-center">
+                Tipo
+                <span class="sort-indicator" *ngIf="sortColumn === 'tipo'">
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenarTabela('frequencia_1bi')" class="sortable text-center">
+                Freq. 1º Bi
+                <span class="sort-indicator" *ngIf="sortColumn === 'frequencia_1bi'">
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenarTabela('frequencia_2bi')" class="sortable text-center">
+                Freq. 2º Bi
+                <span class="sort-indicator" *ngIf="sortColumn === 'frequencia_2bi'">
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenarTabela('score_super_bi')" class="sortable text-center">
+                Score Super BI
+                <span class="sort-indicator" *ngIf="sortColumn === 'score_super_bi'">
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th (click)="ordenarTabela('evolucao')" class="sortable text-center">
+                Evolução
+                <span class="sort-indicator" *ngIf="sortColumn === 'evolucao'">
+                  {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                </span>
+              </th>
+              <th class="text-center">Classificação</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let escola of escolasOrdenadas; let i = index" 
+                [class.even-row]="i % 2 === 0"
+                [class.pei-row]="escola.tipo === 'PEI'">
+              <td class="school-name">
+                <strong>{{ escola.nome }}</strong>
+              </td>
+              <td class="text-center">
+                <span [class]="'badge badge-' + (escola.tipo === 'PEI' ? 'pei' : 'regular')">
+                  {{ escola.tipo }}
+                </span>
+              </td>
+              <td class="text-center">
+                {{ escola.frequencia_1bi | number:'1.1-1' }}%
+              </td>
+              <td class="text-center">
+                {{ escola.frequencia_2bi | number:'1.1-1' }}%
+              </td>
+              <td class="text-center score-cell">
+                <strong>{{ escola.score_super_bi | number:'1.1-1' }}</strong>
+              </td>
+              <td class="text-center">
+                <span [class]="getCorEvolucao(calcularEvolucao(escola))">
+                  {{ getIconeEvolucao(calcularEvolucao(escola)) }}
+                  {{ calcularEvolucao(escola) > 0 ? '+' : '' }}{{ calcularEvolucao(escola) | number:'1.1-1' }}%
+                </span>
+              </td>
+              <td class="text-center">
+                <span [class]="'badge badge-classificacao badge-' + escola.classificacao.toLowerCase().replace(' ', '-')">
+                  {{ escola.classificacao }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer Info -->
+    <footer class="dashboard-footer">
+      <p>
+        💡 <strong>Dica:</strong> Clique nos cabeçalhos da tabela para ordenar os dados
+      </p>
+      <p class="update-info">
+        Última atualização: {{ now | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </footer>
+  </div>
+</div>

@@ -33,6 +33,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   escolasOrdenadas: Escola[] = [];
   sortColumn: string = 'score_super_bi';
   sortDirection: 'asc' | 'desc' = 'desc';
+  
+  // Metadata
+  now = new Date();
 
   constructor(private escolaService: EscolaService) {}
 
