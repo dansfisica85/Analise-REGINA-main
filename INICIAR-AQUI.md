@@ -1,27 +1,33 @@
 # 🚀 Guia Rápido - Executar Aplicação Angular REGINA
 
 ## Pré-requisitos
+
 - Node.js 18+ instalado
 - npm (vem com Node.js)
 
 ## Passos para rodar
 
+## Passos para rodar
+
 ### 1️⃣ Copiar os assets
+
 ```powershell
 .\copiar-assets.ps1
 ```
 
 ### 2️⃣ Instalar dependências
+
 ```powershell
 npm install
 ```
 
 ### 3️⃣ Iniciar aplicação
+
 ```powershell
 npm start
 ```
 
-A aplicação abrirá automaticamente em http://localhost:4200
+A aplicação abrirá automaticamente em <http://localhost:4200>
 
 ## 📱 Rotas disponíveis
 
@@ -31,7 +37,9 @@ A aplicação abrirá automaticamente em http://localhost:4200
 ## ✨ O que foi transformado
 
 ### Componente Comparativo (Angular nativo)
+
 ✅ **comparativo.html** → **ComparativoComponent**
+
 - Template Angular com data binding
 - Lógica TypeScript
 - Chart.js integrado via npm
@@ -40,6 +48,7 @@ A aplicação abrirá automaticamente em http://localhost:4200
 - Gerenciamento de lifecycle
 
 ### Arquitetura
+
 - ✅ Serviço `EscolaService` - Carrega e gerencia dados
 - ✅ Models TypeScript - Interfaces tipadas
 - ✅ Componentes modulares
@@ -59,17 +68,21 @@ Para converter outras páginas (index.html, visao-geral.html, etc.), use o Compa
 ## 🐛 Problemas comuns
 
 ### Erro: comando 'ng' não encontrado
+
 ```powershell
 npx ng serve
 ```
 
 ### JSON não carrega
+
 Verifique se existe: `src/assets/static/dados_escolas.json`
 
 ### Gráficos não aparecem
+
 - Abra o console do navegador (F12)
 - Verifique se há erros de carregamento
 - Confirme que os dados foram carregados
 
 ## 📚 Documentação completa
+
 Veja `README-Angular.md` para detalhes técnicos completos.

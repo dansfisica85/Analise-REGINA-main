@@ -165,6 +165,7 @@ export class DashboardComponent {
 ```
 
 **🎯 Benefícios:**
+
 - ✅ **Zero duplicação** - um único `EscolaService`
 - ✅ **Tipagem** - `Escola[]` previne erros
 - ✅ **Data binding** - atualização automática da UI
@@ -255,31 +256,37 @@ npm run build
 ## 📚 Conceitos Angular Usados
 
 ### 1. **Components** 🧩
+
 - **O que é:** Blocos reutilizáveis de UI (HTML + TS + CSS)
 - **Por que:** Evita duplicação, facilita manutenção
 - **Exemplo:** `ComparativoComponent` = análise PEI vs Regular
 
 ### 2. **Services** 🔧
+
 - **O que é:** Lógica de negócio compartilhada
 - **Por que:** Centraliza dados, evita estado global
 - **Exemplo:** `EscolaService` = carrega e gerencia dados das escolas
 
 ### 3. **Dependency Injection** 💉
+
 - **O que é:** Angular fornece services automaticamente
 - **Por que:** Desacoplamento, testabilidade
 - **Exemplo:** `constructor(private service: EscolaService)`
 
 ### 4. **Observables (RxJS)** 📡
+
 - **O que é:** Stream de dados assíncrono
 - **Por que:** Gerenciamento reativo, cancelamento fácil
 - **Exemplo:** `escolas$.subscribe(data => ...)`
 
 ### 5. **Routing** 🛣️
+
 - **O que é:** Navegação sem reload de página
 - **Por que:** UX fluida, URLs funcionam
 - **Exemplo:** `/comparativo`, `/dashboard`, `/simulador`
 
 ### 6. **TypeScript** 📘
+
 - **O que é:** JavaScript com tipos
 - **Por que:** Previne bugs, autocomplete, refatoração segura
 - **Exemplo:** `escola: Escola` (não aceita qualquer coisa!)
