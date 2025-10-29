@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npx ng serve --open",
     "build": "npx ng build --configuration production",
-    "test": "npx ng test"
+    "test": "npx ng test",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@angular/animations": "^16.0.0",
